@@ -14,13 +14,11 @@ PREDICTION_DIR = os.path.join(PROJECT_DIR, 'predictions')
 DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument('--dataset', type=str, choices=['temple', 'mini-temple'],default='mini-temple')
+argparser.add_argument('--dataset', type=str, choices=['temple', 'mini-temple'])
 argparser.add_argument('--ba', action='store_true')
 args = argparser.parse_args()
 
 DATASET = args.dataset
-if DATASET is None:
-    raise ValueError("The --dataset argument is required. Please specify either 'temple' or 'mini-temple'.")
 DATASET_DIR = os.path.join(DATA_DIR, DATASET)
 IMAGE_DIR = os.path.join(DATASET_DIR, 'images')
 INTRINSICS_FILE = os.path.join(DATASET_DIR, 'intrinsics.txt')
@@ -120,8 +118,7 @@ def detect_keypoints(image_file: os.path):
     """ YOUR CODE HERE:
     Detect keypoints using cv2.SIFT_create() and sift.detectAndCompute
     """
-
-    image = cv2.imread(image_file, cv2.IMREAD_GRAYSCALE)
+    image = cv2.imread(image_file)
     sift = cv2.SIFT_create()
     keypoints, descriptors = sift.detectAndCompute(image, None)
     """ END YOUR CODE HERE. """
@@ -173,7 +170,6 @@ def create_feature_matches(image_file1: os.path, image_file2: os.path, lowe_rati
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(descriptors1, descriptors2, 2)
 
-    # Apply ratio test
     for m, n in matches:
         if m.distance < lowe_ratio * n.distance:
             good_matches.append([m])
@@ -290,7 +286,6 @@ def create_scene_graph(image_files: list, min_num_inliers: int = 40):
             match_id = '{}_{}'.format(id_1, id_2)
             match_save_file = os.path.join(RANSAC_MATCH_DIR, match_id + '.npy')
 
-            # Check file exist or not
             if os.path.exists(match_save_file):
                 inliers = np.load(match_save_file)
                 if len(inliers) > min_num_inliers:
